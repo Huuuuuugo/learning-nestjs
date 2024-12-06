@@ -1,0 +1,15 @@
+{
+  "editor.formatOnSave": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "symbols.files.associations": {
+    "*.controller.ts": "nest-controller",
+    "*.module.ts": "nest",
+    "*.service.ts": "nest-service"
+  },
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "files.eol": "\n",
+  "editor.detectIndentation": false  
+}
