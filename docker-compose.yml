@@ -1,0 +1,15 @@
+services:
+  postgresql:
+    image: 'postgres'
+
+    environment:
+      POSTGRES_PASSWORD: '1234'
+
+    ports:
+      - '5432:5432'
+
+    volumes:
+      - 'crud_postgres:/var/lib/postgresql/data'
+
+volumes:
+  crud_postgres:
