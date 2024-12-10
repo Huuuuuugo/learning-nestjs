@@ -1,10 +1,9 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
-  NotFoundException,
+  HttpCode,
   Param,
   ParseIntPipe,
   Patch,
@@ -19,49 +18,31 @@ export class RecadosController {
   constructor(private readonly recadosService: RecadosService) {}
 
   @Get()
-  getAll() {
-    return this.recadosService.getAll();
+  async getAll() {
+    return await this.recadosService.getAll();
   }
 
   @Get(':id')
-  getOne(@Param('id', ParseIntPipe) id: number) {
-    const recado = this.recadosService.getOne(id);
-    if (recado === undefined) {
-      throw new NotFoundException();
-    } else {
-      return recado;
-    }
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.recadosService.getOne(id);
   }
 
   @Post()
-  create(@Body() createRecadoDto: CreateRecadoDto) {
-    return this.recadosService.create(createRecadoDto);
+  async create(@Body() createRecadoDto: CreateRecadoDto) {
+    return await this.recadosService.create(createRecadoDto);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatedRecadoDto: UpdateRecadoDto,
   ) {
-    if (id === undefined) {
-      throw new BadRequestException('Missing id.');
-    }
-
-    const updatedRecado = this.recadosService.update(id, updatedRecadoDto);
-    if (updatedRecado !== undefined) {
-      return updatedRecado;
-    } else {
-      throw new NotFoundException();
-    }
+    return await this.recadosService.update(id, updatedRecadoDto);
   }
 
+  @HttpCode(204)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    const success = this.recadosService.remove(id);
-    if (!success) {
-      throw new NotFoundException();
-    } else {
-      return 'Deleted';
-    }
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return await this.recadosService.remove(id);
   }
 }

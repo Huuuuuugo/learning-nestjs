@@ -1,24 +1,31 @@
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
+@Entity()
 export class Recado {
-  static id = 0;
+  @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'varchar', length: 255, nullable: false })
   recado: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: false })
   from: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: false })
   to: string;
-  date: Date;
+
+  @Column({ default: false })
   seen: boolean;
 
-  constructor(recado: string, from: string, to: string) {
-    // id
-    this.id = Recado.id;
-    Recado.id++;
+  @CreateDateColumn()
+  date: Date;
 
-    // user assigned properties
-    this.recado = recado;
-    this.from = from;
-    this.to = to;
-
-    // automatically assigned properties
-    this.date = new Date();
-    this.seen = false;
-  }
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

@@ -1,67 +1,72 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Recado } from './entities/recado.entity';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
 import { CreateRecadoDto } from './dto/create-recado.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class RecadosService {
-  #recadosList = [];
+  constructor(
+    @InjectRepository(Recado)
+    private readonly recadoRepository: Repository<Recado>,
+  ) {}
 
-  getAll() {
-    return this.#recadosList;
+  async getAll() {
+    return await this.recadoRepository.find();
   }
 
-  getOne(id: number) {
-    // update 'seen' status and return the element
-    this.update(id, { seen: true });
-    return this.#recadosList.find((item) => item.id === id);
+  async getOne(id: number) {
+    // get the target registry
+    const target = await this.recadoRepository.findOne({ where: { id } });
+
+    // return registry or throw 404 exception
+    if (target) {
+      // update 'seen' status
+      const updated = await this.update(id, { seen: true });
+      return updated;
+    } else {
+      throw new NotFoundException();
+    }
   }
 
-  create(createRecadoDto: CreateRecadoDto) {
+  async create(createRecadoDto: CreateRecadoDto) {
     // get values
     const { recado, from, to } = createRecadoDto;
 
-    // create new instance of Recado and append it to the list
-    const newRecado = new Recado(recado, from, to);
-    this.#recadosList.push(newRecado);
-
-    return newRecado;
+    //  create registry
+    return await this.recadoRepository.save([{ recado, from, to }]);
   }
 
-  update(id: number, updateRecadoDto: UpdateRecadoDto) {
+  async update(id: number, updateRecadoDto: UpdateRecadoDto) {
+    // check if id is present
+    if (id === undefined) {
+      throw new BadRequestException('Missing id.');
+    }
+
     // get values
-    const { recado, from, to, seen } = updateRecadoDto;
+    const { from, to, seen } = updateRecadoDto;
 
-    // get the index of the selected element
-    const recadoIndex = this.#recadosList.findIndex((item) => item.id === id);
-    const recadoObj = this.#recadosList[recadoIndex];
+    // update registry if it already exists
+    const target = await this.recadoRepository.preload({ id, from, to, seen });
 
-    // update all the given values
-    if (recadoIndex >= 0) {
-      if (recado !== undefined) recadoObj.recado = recado;
-      if (recado !== undefined) recadoObj.from = from;
-      if (from !== undefined) recadoObj.from = from;
-      if (to !== undefined) recadoObj.to = to;
-      if (seen !== undefined) recadoObj.seen = seen;
-
-      return recadoObj;
-    }
-    // return undefined if the element wasn't fount
-    else {
-      return undefined;
+    // update registry or throw 404 exception
+    if (target) {
+      return await this.recadoRepository.save([target]);
+    } else {
+      throw new NotFoundException();
     }
   }
 
-  remove(id: number) {
-    // get the index of the selected element
-    const recadoIndex = this.#recadosList.findIndex((item) => item.id === id);
+  async remove(id: number) {
+    const affected = (await this.recadoRepository.delete(id)).affected;
 
-    // remove element and return true if it was found or false if it was not
-    if (recadoIndex >= 0) {
-      this.#recadosList.splice(recadoIndex, 1);
-      return true;
-    } else {
-      return false;
+    if (!affected) {
+      throw new NotFoundException();
     }
   }
 }
