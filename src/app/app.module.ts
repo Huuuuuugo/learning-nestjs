@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RecadosModule } from '../recados/recados.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PessoaModule } from 'src/pessoa/pessoa.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: true, // every change in the structure of the entities will be reflected on the database (used for development only)
     }),
     RecadosModule,
+    PessoaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
