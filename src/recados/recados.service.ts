@@ -8,12 +8,14 @@ import { UpdateRecadoDto } from './dto/update-recado.dto';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PessoaService } from 'src/pessoa/pessoa.service';
 
 @Injectable()
 export class RecadosService {
   constructor(
     @InjectRepository(Recado)
     private readonly recadoRepository: Repository<Recado>,
+    private readonly pessoaService: PessoaService,
   ) {}
 
   async getAll() {
@@ -38,8 +40,26 @@ export class RecadosService {
     // get values
     const { recado, from, to } = createRecadoDto;
 
+    // find sender
+    const sender = await this.pessoaService.findOne(from);
+
+    // finde receiver
+    const receiver = await this.pessoaService.findOne(to);
+
     //  create registry
-    return await this.recadoRepository.save([{ recado, from, to }]);
+    const newRecado = this.recadoRepository.create({
+      recado,
+      from: sender,
+      to: receiver,
+    });
+
+    await this.recadoRepository.save(newRecado);
+
+    return {
+      ...newRecado,
+      from: { name: sender.name },
+      to: { name: receiver.name },
+    };
   }
 
   async update(id: number, updateRecadoDto: UpdateRecadoDto) {
@@ -49,10 +69,10 @@ export class RecadosService {
     }
 
     // get values
-    const { from, to, seen } = updateRecadoDto;
+    const { recado, seen } = updateRecadoDto;
 
     // update registry if it already exists
-    const target = await this.recadoRepository.preload({ id, from, to, seen });
+    const target = await this.recadoRepository.preload({ id, recado, seen });
 
     // update registry or throw 404 exception
     if (target) {

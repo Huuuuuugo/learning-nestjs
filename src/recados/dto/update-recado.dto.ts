@@ -15,20 +15,6 @@ export class UpdateRecadoDto {
   @IsOptional()
   readonly recado?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(50)
-  @IsOptional()
-  readonly from?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(50)
-  @IsOptional()
-  readonly to?: string;
-
   @IsBoolean()
   @IsNotEmpty()
   @IsOptional()
