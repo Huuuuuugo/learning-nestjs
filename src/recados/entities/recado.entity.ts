@@ -14,14 +14,14 @@ export class Recado {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ name: 'content', type: 'varchar', length: 255, nullable: false })
   recado: string;
 
-  @ManyToOne(() => Pessoa)
+  @ManyToOne(() => Pessoa, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sender_id' })
   from: Pessoa;
 
-  @ManyToOne(() => Pessoa)
+  @ManyToOne(() => Pessoa, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'receiver_id' })
   to: Pessoa;
 

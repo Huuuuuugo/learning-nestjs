@@ -24,7 +24,7 @@ export class RecadosController {
 
   @Get(':id')
   async getOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.recadosService.getOne(id);
+    return await this.recadosService.getOne(id, true);
   }
 
   @Post()

@@ -22,15 +22,28 @@ export class RecadosService {
     return await this.recadoRepository.find();
   }
 
-  async getOne(id: number) {
+  async getOne(id: number, updateSeen: boolean = false) {
     // get the target registry
-    const target = await this.recadoRepository.findOne({ where: { id } });
+    const target = await this.recadoRepository.findOne({
+      where: { id },
+      relations: ['from', 'to'],
+    });
 
     // return registry or throw 404 exception
     if (target) {
+      // hide sensitive information
+      const result = {
+        ...target,
+        from: { name: target.from.name },
+        to: { name: target.to.name },
+      };
+
       // update 'seen' status
-      const updated = await this.update(id, { seen: true });
-      return updated;
+      if (updateSeen && !target.seen) {
+        const updated = await this.update(id, { seen: true });
+        return { ...result, seen: updated.seen };
+      }
+      return result;
     } else {
       throw new NotFoundException();
     }
@@ -68,6 +81,9 @@ export class RecadosService {
       throw new BadRequestException('Missing id.');
     }
 
+    // search for the original registry
+    const original = this.getOne(id);
+
     // get values
     const { recado, seen } = updateRecadoDto;
 
@@ -75,8 +91,10 @@ export class RecadosService {
     const target = await this.recadoRepository.preload({ id, recado, seen });
 
     // update registry or throw 404 exception
-    if (target) {
-      return await this.recadoRepository.save([target]);
+    if (original) {
+      // save changes
+      await this.recadoRepository.save(target);
+      return { ...target, ...original };
     } else {
       throw new NotFoundException();
     }
