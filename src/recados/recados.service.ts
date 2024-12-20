@@ -9,6 +9,7 @@ import { CreateRecadoDto } from './dto/create-recado.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PessoaService } from 'src/pessoa/pessoa.service';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class RecadosService {
@@ -18,8 +19,10 @@ export class RecadosService {
     private readonly pessoaService: PessoaService,
   ) {}
 
-  async getAll() {
-    return await this.recadoRepository.find();
+  async getAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
+
+    return await this.recadoRepository.find({ take: limit, skip: offset });
   }
 
   async getOne(id: number, updateSeen: boolean = false) {
