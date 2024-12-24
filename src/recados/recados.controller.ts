@@ -9,13 +9,16 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { RecadosService } from './recados.service';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { LogInterceptor } from 'src/common/interceptors/log.interceptor';
 
 @Controller('recados')
+@UseInterceptors(LogInterceptor)
 export class RecadosController {
   constructor(private readonly recadosService: RecadosService) {}
 

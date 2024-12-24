@@ -8,12 +8,15 @@ import {
   Delete,
   HttpCode,
   ParseIntPipe,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PessoaService } from './pessoa.service';
 import { CreatePessoaDto } from './dto/create-pessoa.dto';
 import { UpdatePessoaDto } from './dto/update-pessoa.dto';
+import { LogInterceptor } from 'src/common/interceptors/log.interceptor';
 
 @Controller('pessoa')
+@UseInterceptors(LogInterceptor)
 export class PessoaController {
   constructor(private readonly pessoaService: PessoaService) {}
 
