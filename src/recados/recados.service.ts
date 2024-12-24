@@ -22,7 +22,24 @@ export class RecadosService {
   async getAll(paginationDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto;
 
-    return await this.recadoRepository.find({ take: limit, skip: offset });
+    return await this.recadoRepository.find({
+      take: limit,
+      skip: offset,
+      relations: ['from', 'to'],
+      select: {
+        id: true,
+        recado: true,
+        seen: true,
+        from: {
+          name: true,
+        },
+        to: {
+          name: true,
+        },
+        date: true,
+        updatedAt: true,
+      },
+    });
   }
 
   async getOne(id: number, updateSeen: boolean = false) {
@@ -30,23 +47,29 @@ export class RecadosService {
     const target = await this.recadoRepository.findOne({
       where: { id },
       relations: ['from', 'to'],
+      select: {
+        id: true,
+        recado: true,
+        seen: true,
+        from: {
+          name: true,
+        },
+        to: {
+          name: true,
+        },
+        date: true,
+        updatedAt: true,
+      },
     });
 
     // return registry or throw 404 exception
     if (target) {
-      // hide sensitive information
-      const result = {
-        ...target,
-        from: { name: target.from.name },
-        to: { name: target.to.name },
-      };
-
       // update 'seen' status
       if (updateSeen && !target.seen) {
         const updated = await this.update(id, { seen: true });
-        return { ...result, seen: updated.seen };
+        return { ...target, seen: updated.seen };
       }
-      return result;
+      return target;
     } else {
       throw new NotFoundException();
     }
@@ -81,11 +104,11 @@ export class RecadosService {
   async update(id: number, updateRecadoDto: UpdateRecadoDto) {
     // check if id is present
     if (id === undefined) {
-      throw new BadRequestException('Missing id.');
+      throw new BadRequestException('Missing id');
     }
 
     // search for the original registry
-    const original = this.getOne(id);
+    const original = await this.getOne(id);
 
     // get values
     const { recado, seen } = updateRecadoDto;
@@ -97,7 +120,7 @@ export class RecadosService {
     if (original) {
       // save changes
       await this.recadoRepository.save(target);
-      return { ...target, ...original };
+      return { ...original, ...target };
     } else {
       throw new NotFoundException();
     }

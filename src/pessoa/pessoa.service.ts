@@ -37,7 +37,7 @@ export class PessoaService {
     } catch (error) {
       // throw conflict exception if email is already registered
       if (error.code === '23505') {
-        throw new ConflictException('Este email já foi cadastrado');
+        throw new ConflictException('Email already registered');
       }
 
       throw error;
@@ -52,7 +52,7 @@ export class PessoaService {
     if (pessoa.length) {
       return pessoa[0];
     } else {
-      throw new NotFoundException('Pessoa não encontrada');
+      throw new NotFoundException('Person not found');
     }
   }
 
@@ -62,8 +62,8 @@ export class PessoaService {
     const passwordHash = password;
 
     // throw bad request if updatePessoaDto is empty
-    if (!(name && password)) {
-      throw new BadRequestException('Requisição vazia');
+    if (!(name || password)) {
+      throw new BadRequestException('Empty request');
     }
 
     // search and update the registry
@@ -78,7 +78,7 @@ export class PessoaService {
       this.pessoaRepository.save(newPessoa);
       return newPessoa;
     } else {
-      throw new NotFoundException('Pessoa não encontrada');
+      throw new NotFoundException('Person not found');
     }
   }
 
@@ -88,7 +88,7 @@ export class PessoaService {
 
     // if no rows were affected, throw not found exception
     if (!affected) {
-      throw new NotFoundException('Pessoa não encontrada');
+      throw new NotFoundException('Person not found');
     }
   }
 }
